@@ -37,3 +37,33 @@ def kmeans_segmentation(img, k=3):
     segmented = centers[labels.flatten()]
     segmented = segmented.reshape(img.shape)
     return segmented
+
+
+
+
+def compute_iou(mask1, mask2):
+    mask1 = mask1.astype(bool)
+    mask2 = mask2.astype(bool)
+
+    intersection = np.logical_and(mask1, mask2).sum()
+    union = np.logical_or(mask1, mask2).sum()
+
+    if union == 0:
+        return 0.0
+
+    return intersection / union
+
+
+def get_threshold_mask(img):
+    _, mask = cv2.threshold(
+        img, 0, 255,
+        cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )
+    return mask
+
+
+def get_kmeans_mask(segmented_img):
+    # assume tumor region = brightest cluster
+    gray = segmented_img.copy()
+    _, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return mask
