@@ -1,1 +1,0 @@
-# Multi-Class Brain Tumor Classification from MRI Images
