@@ -1,17 +1,67 @@
 import cv2
+import numpy as np
+from sklearn.cluster import KMeans
+
 
 # initialize SIFT 
 sift = cv2.SIFT_create()
 
 
 
-# Extract keypoints + descriptors (numeric vector representation of the local region)
+# Extract keypoints + descriptors For ONE image (numeric vector representation of the local region)
 def get_sift_features(img):
     #ensure image is in uint8 format
     if img.dtype != "uint8":
         img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX).astype("uint8")
     keypoints, descriptors = sift.detectAndCompute(img, None)
+    if descriptors is None:
+        return [], None
     return keypoints, descriptors
+# descriptors shape = (N, 128) 
+# N = number of keypoints (varies per image) (so number of descriptors also varies per image)
+# (this is a problem for ML models that expect fixed-size input,
+# so we need to build a "vocabulary" of visual words
+# to convert variable-length descriptors into fixed-length feature vectors)
+
+
+
+# combine all descriptors and group similar descriptors into clusters
+# Cluster 0 => edge-like patterns
+# Cluster 1 => corner-like patterns
+# Cluster 2 => texture patterns
+# etc
+# therefore => vocabulary = "list of visual patterns in ALL images"
+def build_vocabulary(descriptor_list, vocab_size=100):
+    descriptor_list = [d for d in descriptor_list if d is not None]
+    #stack all descriptors into a single array
+    all_descriptors = np.vstack(descriptor_list)
+    
+    #apply kmeans to find cluster centers (visual words)
+    kmeans = KMeans(n_clusters=vocab_size, random_state=42)
+    kmeans.fit(all_descriptors)
+    
+    return kmeans
+
+
+
+
+def image_to_feature(img, kmeans, vocab_size=100):
+    keypoints, descriptors = get_sift_features(img)
+    if descriptors is None:
+        return np.zeros(vocab_size)  #return empty histogram if no features found
+    
+    #predict which cluster each descriptor belongs or is assigned to (For THIS image, which visual word does each descriptor belong to?)
+    visual_words = kmeans.predict(descriptors)
+    
+    #build histogram to count how many times each “visual word” appears
+    feature_vector_hist = np.bincount(visual_words, minlength=vocab_size)
+    
+    #normalize histogram
+    norm = np.linalg.norm(feature_vector_hist)
+    if norm != 0:
+        feature_vector_hist = feature_vector_hist / norm
+    
+    return feature_vector_hist
 
 
 
