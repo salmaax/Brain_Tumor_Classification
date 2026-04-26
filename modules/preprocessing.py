@@ -37,5 +37,6 @@ def filter_image(img, method="gaussian", ksize=5):
     
 def preprocess(img, img_size=(256, 256), method="gaussian", ksize=5):
     img = standardize(img, img_size)
-    img = filter_image(img, method, ksize)
+    img = gaussian_filter(img, ksize)
+    img = median_filter(img, ksize)
     return img
