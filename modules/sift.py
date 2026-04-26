@@ -44,7 +44,11 @@ def build_vocabulary(descriptor_list, vocab_size=100):
 
 
 
-
+# many descriptors per image (variable number)
+# each descriptor assigned to a “visual word” (cluster index)
+# So each image becomes:
+# [3, 0, 7, 1, 0, 2, ...] (each descriptor's assigned cluster index is written as a number)
+# This is a histogram of counts
 def image_to_feature(img, kmeans, vocab_size=100):
     keypoints, descriptors = get_sift_features(img)
     if descriptors is None:
