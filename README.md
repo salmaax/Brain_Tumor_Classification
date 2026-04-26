@@ -2,7 +2,6 @@
 
 ---
 
-## Why
 
 Brain tumor classification from MRI images is a critical task in medical diagnostics. Manual analysis is time-consuming and subject to human error.
 
