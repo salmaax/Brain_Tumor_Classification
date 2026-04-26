@@ -91,3 +91,34 @@ def match_images(img1, img2, top_k=30):
         flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
     )
     return matched_img, matches
+
+
+
+def matching_accuracy(matches):
+    if matches is None or len(matches) == 0:
+        return 0.0
+
+    distances = np.array([m.distance for m in matches])
+
+    # normalize between 0 and 1
+    min_d = np.min(distances)
+    max_d = np.max(distances)
+
+    if max_d == min_d:
+        return 1.0
+
+    norm_distances = (distances - min_d) / (max_d - min_d)
+
+    similarity = 1 - np.mean(norm_distances)
+
+    return float(similarity)
+
+
+def average_matching_score(pairs):
+    scores = []
+
+    for img1, img2 in pairs:
+        _, matches = match_images(img1, img2, top_k=50)
+        scores.append(matching_accuracy(matches))
+
+    return np.mean(scores)
