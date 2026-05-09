@@ -10,6 +10,8 @@ VOCAB_SIZE = 300 #number of visual words in our vocabulary (this is a hyperparam
 
 
 # Extract keypoints + descriptors For ONE image (numeric vector representation of the local region)
+# keypoints :	locations of interesting points
+# descriptors :	128-D vector describing each point
 def get_sift_features(img):
     #ensure image is in uint8 format
     if img.dtype != "uint8":
@@ -18,6 +20,7 @@ def get_sift_features(img):
     if descriptors is None:
         return [], None
     return keypoints, descriptors
+
 # descriptors shape = (N, 128) 
 # N = number of keypoints (varies per image) (so number of descriptors also varies per image)
 # (this is a problem for ML models that expect fixed-size input,
@@ -26,7 +29,7 @@ def get_sift_features(img):
 
 
 
-# combine all descriptors and group similar descriptors into clusters
+# combine all descriptors from all images and group similar descriptors into clusters
 # Cluster 0 => edge-like patterns
 # Cluster 1 => corner-like patterns
 # Cluster 2 => texture patterns
