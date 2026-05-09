@@ -6,6 +6,7 @@ from sklearn.cluster import KMeans
 # initialize SIFT 
 sift = cv2.SIFT_create()
 
+VOCAB_SIZE = 300 #number of visual words in our vocabulary (this is a hyperparameter we can tune)
 
 
 # Extract keypoints + descriptors For ONE image (numeric vector representation of the local region)
@@ -31,7 +32,7 @@ def get_sift_features(img):
 # Cluster 2 => texture patterns
 # etc
 # therefore => vocabulary = "list of visual patterns in ALL images"
-def build_vocabulary(descriptor_list, vocab_size=100):
+def build_vocabulary(descriptor_list, vocab_size= VOCAB_SIZE):
     descriptor_list = [d for d in descriptor_list if d is not None]
     #stack all descriptors into a single array
     all_descriptors = np.vstack(descriptor_list)
@@ -49,7 +50,7 @@ def build_vocabulary(descriptor_list, vocab_size=100):
 # So each image becomes:
 # [3, 0, 7, 1, 0, 2, ...] (each descriptor's assigned cluster index is written as a number)
 # This is a histogram of counts
-def image_to_feature(img, kmeans, vocab_size=100):
+def image_to_feature(img, kmeans, vocab_size=VOCAB_SIZE):
     keypoints, descriptors = get_sift_features(img)
     if descriptors is None:
         return np.zeros(vocab_size)  #return empty histogram if no features found
